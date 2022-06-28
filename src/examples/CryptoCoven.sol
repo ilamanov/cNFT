@@ -26,6 +26,18 @@ contract CryptoCoven is IERC721, IERC165, IERC2981, Ownable, ReentrancyGuard {
     uint256 public immutable maxGiftedWitches;
     uint256 public immutable maxCommunitySaleWitches;
     
+    constructor(
+        address _openSeaProxyRegistryAddress,
+        uint256 _maxWitches,
+        uint256 _maxCommunitySaleWitches,
+        uint256 _maxGiftedWitches
+    ) ERC721("Crypto Coven", "WITCH") {
+        openSeaProxyRegistryAddress = _openSeaProxyRegistryAddress;
+        maxWitches = _maxWitches;
+        maxCommunitySaleWitches = _maxCommunitySaleWitches;
+        maxGiftedWitches = _maxGiftedWitches;
+    }
+    
     modifier maxWitchesPerWallet(uint256 numberOfTokens) {
         require(
             balanceOf(msg.sender) + numberOfTokens <= MAX_WITCHES_PER_WALLET,
@@ -62,18 +74,6 @@ contract CryptoCoven is IERC721, IERC165, IERC2981, Ownable, ReentrancyGuard {
         _;
     }
     
-    constructor(
-        address _openSeaProxyRegistryAddress,
-        uint256 _maxWitches,
-        uint256 _maxCommunitySaleWitches,
-        uint256 _maxGiftedWitches
-    ) ERC721("Crypto Coven", "WITCH") {
-        openSeaProxyRegistryAddress = _openSeaProxyRegistryAddress;
-        maxWitches = _maxWitches;
-        maxCommunitySaleWitches = _maxCommunitySaleWitches;
-        maxGiftedWitches = _maxGiftedWitches;
-    }
-
     // ============ SALE STATE ============
 
     bool public isPublicSaleActive;
