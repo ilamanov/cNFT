@@ -17,8 +17,8 @@ contract ERC721C {
 
     // Mapping from token ID to owner address
     mapping(address => mapping(uint256 => address)) public ownerOf;
-    
-    // ----------- TRANSFER FUNCTIONALITY ----------- 
+
+    // ----------- TRANSFER FUNCTIONALITY -----------
 
     /**
      * @dev See {IERC721-transferFrom}.
@@ -29,17 +29,17 @@ contract ERC721C {
         address to,
         uint256 tokenId
     ) public {
-    // TODO ALSO ADD to gas optimization, is it better to create clientContract=msg.sneder and reuse the var?
-    // TODO how to create a scope so that only msg.sender's stuff is viisble?
-    // TODO how is it better to access? throufh storage read or through this.getter?
-        address owner = ERC721C.ownerOf(msg.sender, tokenId);
-        require(originalSender == owner ||
-            ERC721C.isApprovedForAll(msg.sender, owner, originalSender) ||
-            ERC721C.getApproved(msg.sender, tokenId) == originalSender, "ERC721: caller is not token owner nor approved");
+        // TODO ALSO ADD to gas optimization, is it better to create clientContract=msg.sneder and reuse the var?
+        // TODO how to create a scope so that only msg.sender's stuff is viisble?
+        // TODO how is it better to access? throufh storage read or through this.getter?
+        address owner = ownerOf[msg.sender][tokenId];
         require(
-            owner == from,
-            "ERC721: transfer from incorrect owner"
+            originalSender == owner ||
+                isApprovedForAll[msg.sender][owner][originalSender] ||
+                getApproved[msg.sender][tokenId] == originalSender,
+            "ERC721: caller is not token owner nor approved"
         );
+        require(owner == from, "ERC721: transfer from incorrect owner");
         require(to != address(0), "ERC721: transfer to the zero address");
 
         // Clear approvals from the previous owner
@@ -66,7 +66,7 @@ contract ERC721C {
             "ERC721: transfer to non ERC721Receiver implementer"
         );
     }
-        
+
     /**
      * @dev Internal function to invoke {IERC721Receiver-onERC721Received} on a target address.
      * The call is not executed if the target address is not a contract.
@@ -86,7 +86,8 @@ contract ERC721C {
     ) private returns (bool) {
         // next line check if "to" address is a contract. this is not a fool proof way of checking whether its a contract. check OZ's address contract for caveats. TODO insert the comments in-line here
         if (to.code.length > 0) {
-            try IERC721Receiver(to).onERC721Received(
+            try
+                IERC721Receiver(to).onERC721Received(
                     originalSender,
                     from,
                     tokenId,
@@ -110,9 +111,9 @@ contract ERC721C {
             return true;
         }
     }
-    
+
     // ----------- MINT/BURN FUNCTIONALITY -----------
-    
+
     /**
      * @dev Mints `tokenId` and transfers it to `to`.
      *
@@ -125,12 +126,15 @@ contract ERC721C {
      */
     function mint(address to, uint256 tokenId) public {
         require(to != address(0), "ERC721: mint to the zero address");
-        require(ownerOf[msg.sender][tokenId] == address(0), "ERC721: token already minted");
+        require(
+            ownerOf[msg.sender][tokenId] == address(0),
+            "ERC721: token already minted"
+        );
 
         balanceOf[msg.sender][to] += 1;
         ownerOf[msg.sender][tokenId] = to;
     }
-    
+
     /**
      * @dev Safely mints `tokenId` and transfers it to `to`.
      *
@@ -147,7 +151,13 @@ contract ERC721C {
     ) public {
         mint(to, tokenId);
         require(
-            _checkOnERC721Received(originalSender, address(0), to, tokenId, data),
+            _checkOnERC721Received(
+                originalSender,
+                address(0),
+                to,
+                tokenId,
+                data
+            ),
             "ERC721: transfer to non ERC721Receiver implementer"
         );
     }
@@ -161,7 +171,7 @@ contract ERC721C {
      * - `tokenId` must exist.
      */
     function burn(uint256 tokenId) public {
-        address owner = ERC721C.ownerOf(msg.sender, tokenId);
+        address owner = ownerOf[msg.sender][tokenId];
 
         // Clear approvals
         _approve(address(0), tokenId);
@@ -172,43 +182,51 @@ contract ERC721C {
         // TODO: this and mint function might need sanity checks like who is allowed to burn or mint this token. but since the caller will be modifying only their own storage, might not be nevessary. maybe actually many of the require statements are not actuall mecessary
         // TODO: do i need exists check here?
     }
-    
+
     // ----------- APPROVALS -----------
     // Both trackers have the client contract address as the first key
-    
+
     // Mapping from token ID to approved address
     mapping(address => mapping(uint256 => address)) public getApproved;
 
     // Mapping from owner to operator approvals
-    mapping(address => mapping(address => mapping(address => bool))) public isApprovedForAll;
-    
+    mapping(address => mapping(address => mapping(address => bool)))
+        public isApprovedForAll;
+
     /**
      * @dev See {IERC721-approve}.
      */
-    function approve(address originalSender, address to, uint256 tokenId) public {
-        address owner = ERC721C.ownerOf(msg.sender, tokenId);
+    function approve(
+        address originalSender,
+        address to,
+        uint256 tokenId
+    ) public {
+        address owner = ERC721C.ownerOf[msg.sender][tokenId];
         require(
-            originalSender == owner || isApprovedForAll(owner, originalSender),
+            originalSender == owner ||
+                isApprovedForAll[msg.sender][owner][originalSender],
             "ERC721: approve caller is not token owner nor approved for all"
         );
-        
+
         _approve(to, tokenId);
     }
-    
+
     /**
      * @dev Approve without doing any additional checks
      */
     function _approve(address to, uint256 tokenId) private {
-    // TODO check if msg.semder is correct here
+        // TODO check if msg.semder is correct here
         getApproved[msg.sender][tokenId] = to;
     }
 
     /**
      * @dev See {IERC721-setApprovalForAll}.
      */
-    function setApprovalForAll(address originalSender, address operator, bool approved)
-        public
-    {
+    function setApprovalForAll(
+        address originalSender,
+        address operator,
+        bool approved
+    ) public {
         isApprovedForAll[msg.sender][originalSender][operator] = approved;
     }
 }
