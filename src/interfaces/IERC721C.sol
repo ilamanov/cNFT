@@ -121,7 +121,7 @@ interface IERC721C {
     function setApprovalForAll(
         address originalSender,
         address operator,
-        bool _approved
+        bool approved
     ) external;
 
     /**
