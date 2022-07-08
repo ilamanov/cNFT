@@ -24,7 +24,7 @@ contract ERC721 is IERC721, IERC165 {
         override
         returns (uint256)
     {
-        return composableERC721.balanceOf(msg.sender, owner);
+        return composableERC721.balanceOf(address(this), owner);
     }
 
     function ownerOf(uint256 tokenId)
@@ -34,7 +34,7 @@ contract ERC721 is IERC721, IERC165 {
         override
         returns (address)
     {
-        return composableERC721.ownerOf(msg.sender, tokenId);
+        return composableERC721.ownerOf(address(this), tokenId);
     }
 
     function safeTransferFrom(
