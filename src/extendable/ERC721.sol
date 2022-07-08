@@ -110,6 +110,10 @@ contract ERC721 is IERC165, IERC721 {
         composableERC721.mint(to, tokenId);
     }
 
+    function _burn(uint256 tokenId) internal virtual {
+        composableERC721.burn(tokenId);
+    }
+
     function supportsInterface(bytes4 interfaceId)
         public
         pure
