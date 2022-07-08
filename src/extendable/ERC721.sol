@@ -102,10 +102,6 @@ contract ERC721 is IERC165, IERC721 {
         composableERC721.safeMint(msg.sender, to, tokenId, _data);
     }
 
-    function _safeMint(address to, uint256 tokenId) internal virtual {
-        composableERC721.safeMint(msg.sender, to, tokenId, "");
-    }
-
     function _mint(address to, uint256 tokenId) internal virtual {
         composableERC721.mint(to, tokenId);
     }
