@@ -112,7 +112,7 @@ contract ERC721 is IERC165, IERC721 {
 
     function supportsInterface(bytes4 interfaceId)
         public
-        pure
+        view
         override
         returns (bool)
     {
