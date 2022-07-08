@@ -31,7 +31,6 @@ import "../../extendable/ReentrancyGuard.sol";
 
 import "../../interfaces/IERC721Metadata.sol";
 import "../../interfaces/IERC2981.sol";
-import "../../interfaces/IERC165.sol";
 
 import "../../interfaces/IERC721C.sol";
 import "../../interfaces/IERC20.sol";
@@ -41,11 +40,10 @@ import "./@openzeppelin/contracts/utils/Counters.sol";
 import "./@openzeppelin/contracts/utils/Strings.sol";
 import "./@openzeppelin/contracts/utils/math/SafeMath.sol";
 
-contract CryptoCoven is
+contract CryptoCovenC is
     ERC721,
     IERC721Metadata,
     IERC2981,
-    IERC165,
     Ownable,
     ReentrancyGuard
 {
@@ -166,7 +164,7 @@ contract CryptoCoven is
         maxWitchesPerWallet(numberOfTokens)
     {
         for (uint256 i = 0; i < numberOfTokens; i++) {
-            _safeMint(msg.sender, nextTokenId());
+            _safeMint(msg.sender, nextTokenId(), "");
         }
     }
 
@@ -197,7 +195,7 @@ contract CryptoCoven is
         communityMintCounts[msg.sender] = numAlreadyMinted + numberOfTokens;
 
         for (uint256 i = 0; i < numberOfTokens; i++) {
-            _safeMint(msg.sender, nextTokenId());
+            _safeMint(msg.sender, nextTokenId(), "");
         }
     }
 
@@ -211,7 +209,7 @@ contract CryptoCoven is
         claimed[msg.sender] = true;
         numGiftedWitches += 1;
 
-        _safeMint(msg.sender, nextTokenId());
+        _safeMint(msg.sender, nextTokenId(), "");
     }
 
     // ============ PUBLIC READ-ONLY FUNCTIONS ============
@@ -277,7 +275,7 @@ contract CryptoCoven is
         numGiftedWitches += numToReserve;
 
         for (uint256 i = 0; i < numToReserve; i++) {
-            _safeMint(msg.sender, nextTokenId());
+            _safeMint(msg.sender, nextTokenId(), "");
         }
     }
 
@@ -291,7 +289,7 @@ contract CryptoCoven is
         numGiftedWitches += numToGift;
 
         for (uint256 i = 0; i < numToGift; i++) {
-            _safeMint(addresses[i], nextTokenId());
+            _safeMint(addresses[i], nextTokenId(), "");
         }
     }
 
@@ -336,7 +334,7 @@ contract CryptoCoven is
         public
         view
         virtual
-        override(ERC721, IERC165)
+        override
         returns (bool)
     {
         return
