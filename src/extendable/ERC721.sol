@@ -7,9 +7,10 @@ import "../interfaces/IERC165.sol";
 import "../interfaces/IERC721C.sol";
 
 /**
- * @dev TODO
+ * @dev Extendable ERC721 contract that delegates
+ * all work to the Composable ERC721
  */
-contract ERC721 is IERC165, IERC721 {
+contract ERC721 is IERC721, IERC165 {
     IERC721C private immutable composableERC721;
 
     constructor(IERC721C _composableERC721) {
