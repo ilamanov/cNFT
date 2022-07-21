@@ -42,8 +42,9 @@ contract ERC721 is IERC721, IERC165 {
         address to,
         uint256 tokenId
     ) public virtual override {
-        emit Approval(ownerOf(tokenId), address(0), tokenId);
+        address oldOwner = ownerOf(tokenId);
         composableERC721.transferFrom(msg.sender, from, to, tokenId);
+        emit Approval(oldOwner, address(0), tokenId);
         emit Transfer(from, to, tokenId);
     }
 
@@ -53,8 +54,9 @@ contract ERC721 is IERC721, IERC165 {
         uint256 tokenId,
         bytes memory _data
     ) public virtual override {
-        emit Approval(ownerOf(tokenId), address(0), tokenId);
+        address oldOwner = ownerOf(tokenId);
         composableERC721.safeTransferFrom(msg.sender, from, to, tokenId, _data);
+        emit Approval(oldOwner, address(0), tokenId);
         emit Transfer(from, to, tokenId);
     }
 
@@ -116,12 +118,10 @@ contract ERC721 is IERC721, IERC165 {
     }
 
     function _burn(uint256 tokenId) internal virtual {
-        address owner = ownerOf(tokenId);
-        emit Approval(owner, address(0), tokenId);
-
+        address oldOwner = ownerOf(tokenId);
         composableERC721.burn(tokenId);
-
-        emit Transfer(owner, address(0), tokenId);
+        emit Approval(oldOwner, address(0), tokenId);
+        emit Transfer(oldOwner, address(0), tokenId);
     }
 
     function supportsInterface(bytes4 interfaceId)
