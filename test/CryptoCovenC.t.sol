@@ -8,10 +8,6 @@ import "../src/interfaces/IERC721C.sol";
 contract CryptoCovenCTest is Test {
     function setUp() public {}
 
-    function testExample() public {
-        assertTrue(true);
-    }
-
     function testCryptoCovenCDeploy(
         address composableERC721,
         address openSeaProxyRegistryAddress

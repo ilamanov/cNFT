@@ -7,10 +7,6 @@ import "../src/examples/CryptoCoven/CryptoCoven.sol";
 contract CryptoCovenTest is Test {
     function setUp() public {}
 
-    function testExample() public {
-        assertTrue(true);
-    }
-
     function testCryptoCovenDeploy(address openSeaProxyRegistryAddress) public {
         new CryptoCoven(
             openSeaProxyRegistryAddress,
