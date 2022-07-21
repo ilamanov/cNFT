@@ -63,6 +63,10 @@ contract ERC721C is IERC721C {
     ) public override {
         address owner = _owners[msg.sender][tokenId];
         require(
+            owner != address(0),
+            "ERC721: operator query for nonexistent token"
+        );
+        require(
             originalSender == owner ||
                 isApprovedForAll[msg.sender][owner][originalSender] ||
                 _tokenApprovals[msg.sender][tokenId] == originalSender,
@@ -145,7 +149,7 @@ contract ERC721C is IERC721C {
     /**
      * @dev Mints `tokenId` and transfers it to `to`.
      *
-     * WARNING: Usage of this method is discouraged, use {_safeMint} whenever possible
+     * WARNING: Usage of this method is discouraged, use {safeMint} whenever possible
      *
      * Requirements:
      *
@@ -238,6 +242,7 @@ contract ERC721C is IERC721C {
         uint256 tokenId
     ) external override {
         address owner = _owners[msg.sender][tokenId];
+        require(to != owner, "ERC721: approval to current owner");
         require(
             originalSender == owner ||
                 isApprovedForAll[msg.sender][owner][originalSender],

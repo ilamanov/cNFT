@@ -37,6 +37,14 @@ contract ERC721 is IERC721, IERC165 {
         return composableERC721.ownerOf(address(this), tokenId);
     }
 
+    function transferFrom(
+        address from,
+        address to,
+        uint256 tokenId
+    ) public virtual override {
+        composableERC721.transferFrom(msg.sender, from, to, tokenId);
+    }
+
     function safeTransferFrom(
         address from,
         address to,
@@ -52,26 +60,6 @@ contract ERC721 is IERC721, IERC165 {
         uint256 tokenId
     ) public virtual override {
         composableERC721.safeTransferFrom(msg.sender, from, to, tokenId, "");
-    }
-
-    function transferFrom(
-        address from,
-        address to,
-        uint256 tokenId
-    ) public virtual override {
-        composableERC721.transferFrom(msg.sender, from, to, tokenId);
-    }
-
-    function approve(address to, uint256 tokenId) public virtual override {
-        composableERC721.approve(msg.sender, to, tokenId);
-    }
-
-    function setApprovalForAll(address operator, bool _approved)
-        public
-        virtual
-        override
-    {
-        composableERC721.setApprovalForAll(msg.sender, operator, _approved);
     }
 
     function getApproved(uint256 tokenId)
@@ -93,6 +81,18 @@ contract ERC721 is IERC721, IERC165 {
     {
         return
             composableERC721.isApprovedForAll(address(this), owner, operator);
+    }
+
+    function approve(address to, uint256 tokenId) public virtual override {
+        composableERC721.approve(msg.sender, to, tokenId);
+    }
+
+    function setApprovalForAll(address operator, bool _approved)
+        public
+        virtual
+        override
+    {
+        composableERC721.setApprovalForAll(msg.sender, operator, _approved);
     }
 
     function _safeMint(
