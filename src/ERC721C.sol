@@ -6,7 +6,14 @@ pragma solidity ^0.8.0;
 import "./interfaces/IERC721Receiver.sol";
 
 /**
- * @dev TODO
+ * @dev On-chain composable ERC-721 implementation. This is
+ * a shared contract meant to be used by other NFT contracts (clients).
+ * The benefit of using this instead of extending the OZ;s ERC-721 implementation
+ * is you get on-chain composition instead of off-chain composition.
+ * On-chain composition has lower deploy cost (no need to redeploy the same
+ * OZ contracts over and over) at no significant overhead of transactions cost.
+ * Another benefit of on-chain composition is that the shared contract needs to be
+ * audited only once and all clients can benefit from this one audit (reduced audit costs).
  */
 contract ERC721C {
     // ----------- TRACKERS -----------
@@ -29,9 +36,6 @@ contract ERC721C {
         address to,
         uint256 tokenId
     ) public {
-        // TODO ALSO ADD to gas optimization, is it better to create clientContract=msg.sneder and reuse the var?
-        // TODO how to create a scope so that only msg.sender's stuff is viisble?
-        // TODO how is it better to access? throufh storage read or through this.getter?
         address owner = ownerOf[msg.sender][tokenId];
         require(
             originalSender == owner ||
@@ -84,7 +88,9 @@ contract ERC721C {
         uint256 tokenId,
         bytes memory data
     ) private returns (bool) {
-        // next line check if "to" address is a contract. this is not a fool proof way of checking whether its a contract. check OZ's address contract for caveats. TODO insert the comments in-line here
+        // The neext line checks if "to" address is a contract.
+        // This is not a fool proof way of checking whether its a contract.
+        // See OpenZeppelin's Address.isContract function for caveats.
         if (to.code.length > 0) {
             try
                 IERC721Receiver(to).onERC721Received(
@@ -172,15 +178,13 @@ contract ERC721C {
      */
     function burn(uint256 tokenId) public {
         address owner = ownerOf[msg.sender][tokenId];
+        require(owner != address(0), "ERC721: token does not exist");
 
         // Clear approvals
         _approve(address(0), tokenId);
 
         balanceOf[msg.sender][owner] -= 1;
         delete ownerOf[msg.sender][tokenId];
-
-        // TODO: this and mint function might need sanity checks like who is allowed to burn or mint this token. but since the caller will be modifying only their own storage, might not be nevessary. maybe actually many of the require statements are not actuall mecessary
-        // TODO: do i need exists check here?
     }
 
     // ----------- APPROVALS -----------
@@ -201,7 +205,7 @@ contract ERC721C {
         address to,
         uint256 tokenId
     ) public {
-        address owner = ERC721C.ownerOf[msg.sender][tokenId];
+        address owner = ownerOf[msg.sender][tokenId];
         require(
             originalSender == owner ||
                 isApprovedForAll[msg.sender][owner][originalSender],
@@ -215,7 +219,6 @@ contract ERC721C {
      * @dev Approve without doing any additional checks
      */
     function _approve(address to, uint256 tokenId) private {
-        // TODO check if msg.semder is correct here
         getApproved[msg.sender][tokenId] = to;
     }
 

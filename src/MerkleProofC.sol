@@ -11,6 +11,8 @@ pragma solidity ^0.8.0;
  *
  * See `test/utils/cryptography/MerkleProof.test.js` for some examples.
  */
+
+// This is WIP
 contract MerkleProofC {
     /**
      * @dev Returns true if a `leaf` can be proved to be a part of a Merkle tree
