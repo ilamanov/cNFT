@@ -3,6 +3,7 @@
 
 pragma solidity ^0.8.0;
 
+import "./interfaces/IERC721C.sol";
 import "./interfaces/IERC721Receiver.sol";
 
 /**
@@ -15,32 +16,56 @@ import "./interfaces/IERC721Receiver.sol";
  * Another benefit of on-chain composition is that the shared contract needs to be
  * audited only once and all clients can benefit from this one audit (reduced audit costs).
  */
-contract ERC721C {
+contract ERC721C is IERC721C {
     // ----------- TRACKERS -----------
     // Both trackers have the client contract address as the first key
 
     // Mapping owner address to token count
-    mapping(address => mapping(address => uint256)) public balanceOf;
+    mapping(address => mapping(address => uint256)) public _balances;
 
     // Mapping from token ID to owner address
-    mapping(address => mapping(uint256 => address)) public ownerOf;
+    mapping(address => mapping(uint256 => address)) public _owners;
+
+    function balanceOf(address client, address owner)
+        external
+        view
+        override
+        returns (uint256)
+    {
+        require(
+            owner != address(0),
+            "ERC721: balance query for the zero address"
+        );
+        return _balances[client][owner];
+    }
+
+    function ownerOf(address client, uint256 tokenId)
+        external
+        view
+        override
+        returns (address)
+    {
+        address owner = _owners[client][tokenId];
+        require(
+            owner != address(0),
+            "ERC721: owner query for nonexistent token"
+        );
+        return owner;
+    }
 
     // ----------- TRANSFER FUNCTIONALITY -----------
 
-    /**
-     * @dev See {IERC721-transferFrom}.
-     */
     function transferFrom(
         address originalSender,
         address from,
         address to,
         uint256 tokenId
-    ) public {
-        address owner = ownerOf[msg.sender][tokenId];
+    ) public override {
+        address owner = _owners[msg.sender][tokenId];
         require(
             originalSender == owner ||
                 isApprovedForAll[msg.sender][owner][originalSender] ||
-                getApproved[msg.sender][tokenId] == originalSender,
+                _tokenApprovals[msg.sender][tokenId] == originalSender,
             "ERC721: caller is not token owner nor approved"
         );
         require(owner == from, "ERC721: transfer from incorrect owner");
@@ -49,21 +74,18 @@ contract ERC721C {
         // Clear approvals from the previous owner
         _approve(address(0), tokenId);
 
-        balanceOf[msg.sender][from] -= 1;
-        balanceOf[msg.sender][to] += 1;
-        ownerOf[msg.sender][tokenId] = to;
+        _balances[msg.sender][from] -= 1;
+        _balances[msg.sender][to] += 1;
+        _owners[msg.sender][tokenId] = to;
     }
 
-    /**
-     * @dev See {IERC721-safeTransferFrom}.
-     */
     function safeTransferFrom(
         address originalSender,
         address from,
         address to,
         uint256 tokenId,
         bytes memory data
-    ) public {
+    ) external override {
         transferFrom(originalSender, from, to, tokenId);
         require(
             _checkOnERC721Received(originalSender, from, to, tokenId, data),
@@ -130,15 +152,15 @@ contract ERC721C {
      * - `tokenId` must not exist.
      * - `to` cannot be the zero address.
      */
-    function mint(address to, uint256 tokenId) public {
+    function mint(address to, uint256 tokenId) public override {
         require(to != address(0), "ERC721: mint to the zero address");
         require(
-            ownerOf[msg.sender][tokenId] == address(0),
+            _owners[msg.sender][tokenId] == address(0),
             "ERC721: token already minted"
         );
 
-        balanceOf[msg.sender][to] += 1;
-        ownerOf[msg.sender][tokenId] = to;
+        _balances[msg.sender][to] += 1;
+        _owners[msg.sender][tokenId] = to;
     }
 
     /**
@@ -154,7 +176,7 @@ contract ERC721C {
         address to,
         uint256 tokenId,
         bytes memory data
-    ) public {
+    ) external override {
         mint(to, tokenId);
         require(
             _checkOnERC721Received(
@@ -176,36 +198,46 @@ contract ERC721C {
      *
      * - `tokenId` must exist.
      */
-    function burn(uint256 tokenId) public {
-        address owner = ownerOf[msg.sender][tokenId];
+    function burn(uint256 tokenId) external override {
+        address owner = _owners[msg.sender][tokenId];
         require(owner != address(0), "ERC721: token does not exist");
 
         // Clear approvals
         _approve(address(0), tokenId);
 
-        balanceOf[msg.sender][owner] -= 1;
-        delete ownerOf[msg.sender][tokenId];
+        _balances[msg.sender][owner] -= 1;
+        delete _owners[msg.sender][tokenId];
     }
 
     // ----------- APPROVALS -----------
     // Both trackers have the client contract address as the first key
 
     // Mapping from token ID to approved address
-    mapping(address => mapping(uint256 => address)) public getApproved;
+    mapping(address => mapping(uint256 => address)) public _tokenApprovals;
 
     // Mapping from owner to operator approvals
     mapping(address => mapping(address => mapping(address => bool)))
         public isApprovedForAll;
 
-    /**
-     * @dev See {IERC721-approve}.
-     */
+    function getApproved(address client, uint256 tokenId)
+        external
+        view
+        override
+        returns (address operator)
+    {
+        require(
+            _owners[client][tokenId] != address(0),
+            "ERC721: approved query for nonexistent token"
+        );
+        return _tokenApprovals[client][tokenId];
+    }
+
     function approve(
         address originalSender,
         address to,
         uint256 tokenId
-    ) public {
-        address owner = ownerOf[msg.sender][tokenId];
+    ) external override {
+        address owner = _owners[msg.sender][tokenId];
         require(
             originalSender == owner ||
                 isApprovedForAll[msg.sender][owner][originalSender],
@@ -219,17 +251,14 @@ contract ERC721C {
      * @dev Approve without doing any additional checks
      */
     function _approve(address to, uint256 tokenId) private {
-        getApproved[msg.sender][tokenId] = to;
+        _tokenApprovals[msg.sender][tokenId] = to;
     }
 
-    /**
-     * @dev See {IERC721-setApprovalForAll}.
-     */
     function setApprovalForAll(
         address originalSender,
         address operator,
         bool approved
-    ) public {
+    ) external override {
         isApprovedForAll[msg.sender][originalSender][operator] = approved;
     }
 }
