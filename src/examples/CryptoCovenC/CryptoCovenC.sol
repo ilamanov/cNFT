@@ -27,10 +27,10 @@ pragma solidity ^0.8.0;
 */
 
 import "../../extendable/ERC721.sol";
-import "./@openzeppelin/contracts/interfaces/IERC2981.sol";
 import "./@openzeppelin/contracts/interfaces/IERC20.sol";
 
 import "../../interfaces/IERC721Metadata.sol";
+import "../../interfaces/IERC2981.sol";
 import "../../interfaces/IERC721C.sol";
 
 import "./@openzeppelin/contracts/access/Ownable.sol";

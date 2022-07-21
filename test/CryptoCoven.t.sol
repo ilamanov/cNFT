@@ -2,7 +2,7 @@
 pragma solidity ^0.8.13;
 
 import "forge-std/Test.sol";
-import "../src/examples/CryptoCoven/contracts/CryptoCoven.sol";
+import "../src/examples/CryptoCoven/CryptoCoven.sol";
 
 contract CryptoCovenTest is Test {
     function setUp() public {}
