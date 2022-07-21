@@ -42,7 +42,9 @@ contract ERC721 is IERC721, IERC165 {
         address to,
         uint256 tokenId
     ) public virtual override {
+        emit Approval(ownerOf(tokenId), address(0), tokenId);
         composableERC721.transferFrom(msg.sender, from, to, tokenId);
+        emit Transfer(from, to, tokenId);
     }
 
     function safeTransferFrom(
@@ -51,7 +53,9 @@ contract ERC721 is IERC721, IERC165 {
         uint256 tokenId,
         bytes memory _data
     ) public virtual override {
+        emit Approval(ownerOf(tokenId), address(0), tokenId);
         composableERC721.safeTransferFrom(msg.sender, from, to, tokenId, _data);
+        emit Transfer(from, to, tokenId);
     }
 
     function safeTransferFrom(
@@ -59,7 +63,7 @@ contract ERC721 is IERC721, IERC165 {
         address to,
         uint256 tokenId
     ) public virtual override {
-        composableERC721.safeTransferFrom(msg.sender, from, to, tokenId, "");
+        safeTransferFrom(from, to, tokenId, "");
     }
 
     function getApproved(uint256 tokenId)
@@ -85,6 +89,7 @@ contract ERC721 is IERC721, IERC165 {
 
     function approve(address to, uint256 tokenId) public virtual override {
         composableERC721.approve(msg.sender, to, tokenId);
+        emit Approval(ownerOf(tokenId), to, tokenId);
     }
 
     function setApprovalForAll(address operator, bool _approved)
@@ -93,6 +98,7 @@ contract ERC721 is IERC721, IERC165 {
         override
     {
         composableERC721.setApprovalForAll(msg.sender, operator, _approved);
+        emit ApprovalForAll(msg.sender, operator, _approved);
     }
 
     function _safeMint(
@@ -101,14 +107,21 @@ contract ERC721 is IERC721, IERC165 {
         bytes memory _data
     ) internal virtual {
         composableERC721.safeMint(msg.sender, to, tokenId, _data);
+        emit Transfer(address(0), to, tokenId);
     }
 
     function _mint(address to, uint256 tokenId) internal virtual {
         composableERC721.mint(to, tokenId);
+        emit Transfer(address(0), to, tokenId);
     }
 
     function _burn(uint256 tokenId) internal virtual {
+        address owner = ownerOf(tokenId);
+        emit Approval(owner, address(0), tokenId);
+
         composableERC721.burn(tokenId);
+
+        emit Transfer(owner, address(0), tokenId);
     }
 
     function supportsInterface(bytes4 interfaceId)
