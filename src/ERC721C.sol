@@ -21,10 +21,10 @@ contract ERC721C is IERC721C {
     // Both trackers have the client contract address as the first key
 
     // Mapping owner address to token count
-    mapping(address => mapping(address => uint256)) public _balances;
+    mapping(address => mapping(address => uint256)) private _balances;
 
     // Mapping from token ID to owner address
-    mapping(address => mapping(uint256 => address)) public _owners;
+    mapping(address => mapping(uint256 => address)) private _owners;
 
     function balanceOf(address client, address owner)
         external
@@ -217,7 +217,7 @@ contract ERC721C is IERC721C {
     // Both trackers have the client contract address as the first key
 
     // Mapping from token ID to approved address
-    mapping(address => mapping(uint256 => address)) public _tokenApprovals;
+    mapping(address => mapping(uint256 => address)) private _tokenApprovals;
 
     // Mapping from owner to operator approvals
     mapping(address => mapping(address => mapping(address => bool)))
