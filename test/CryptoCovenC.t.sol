@@ -27,6 +27,22 @@ contract User is IERC721Receiver {
         );
     }
 
+    function approve(address to) public {
+        cryptoCovenC.approve(
+            to,
+            /* tokenId= */
+            1
+        );
+    }
+
+    function setApprovalForAll(address operator) public {
+        cryptoCovenC.setApprovalForAll(
+            operator,
+            /* approved= */
+            true
+        );
+    }
+
     function onERC721Received(
         address,
         address,
@@ -85,5 +101,15 @@ contract CryptoCovenCTest is Test {
     function testTransfer(address to) public {
         vm.assume(to > address(0));
         user.safeTransferFrom(to);
+    }
+
+    function testApprove(address to) public {
+        vm.assume(to > address(0));
+        user.approve(to);
+    }
+
+    function testSetApprovalForAll(address operator) public {
+        vm.assume(operator > address(0));
+        user.setApprovalForAll(operator);
     }
 }
